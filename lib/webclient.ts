@@ -19,7 +19,7 @@ export async function getCount(): Promise<Number> {
     console.log("Latest block number:", state.blockNum());
     await client.syncState();
 
-    return 5;
+    return state.blockNum();
   } catch (error) {
     console.error("Error:", error);
     return 0;
