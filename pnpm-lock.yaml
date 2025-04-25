@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@demox-labs/miden-sdk':
-        specifier: ^0.8.2
-        version: 0.8.2(chai@5.2.0)
+        specifier: ^0.8.3
+        version: 0.8.3(chai@5.2.0)
       '@demox-labs/miden-wallet-adapter-base':
         specifier: ^0.1.0
         version: 0.1.4
@@ -26,9 +26,6 @@ importers:
       git:
         specifier: link:github.com:demox-labs/miden-wallet-adapter.git
         version: link:github.com:demox-labs/miden-wallet-adapter.git
-      miden-test-sdk:
-        specifier: ^0.8.7
-        version: 0.8.7(chai@5.2.0)
       miden-wallet-adapter-reactui:
         specifier: link:@demox-labs/miden-wallet-adapter-reactui
         version: link:@demox-labs/miden-wallet-adapter-reactui
@@ -73,8 +70,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@demox-labs/miden-sdk@0.8.2':
-    resolution: {integrity: sha512-Eo1LbSo1jh/TuMmj1ILgz5GFHXOSChRMnjU3J8JCz/4PWgSSWB7BZ9YWV8PD2mEHL6cyPDLtrYsaVUPFQttidQ==}
+  '@demox-labs/miden-sdk@0.8.3':
+    resolution: {integrity: sha512-OcvX5WR6J9NSnSa1Q6YFAgutMfF3W50GNTcFr4T4FNp0tBnZA6Uhew6UImHauRKlR79tD6t+Ock9Nlaeoiev/A==}
 
   '@demox-labs/miden-wallet-adapter-base@0.1.4':
     resolution: {integrity: sha512-FCOmtT63mdCyAzEtPSwNdclaNga7hot2uK125HSh67yme5ck5OB0iWZj7tC3odOFU7+5N9Xzko6vPZqC3GUjUg==}
@@ -867,9 +864,6 @@ packages:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
 
-  miden-test-sdk@0.8.7:
-    resolution: {integrity: sha512-Hcx/XFebBFYdmjUJxHdR9HswOxZUZDGogWjaaGNxiwkRoTuBVK++u35zv7IdPdDgYd/lAU9nmv67epIJ7U21Tw==}
-
   minimatch@10.0.1:
     resolution: {integrity: sha512-ethXTt3SGGR+95gudmqJ1eNhRO7eGEGIgYA9vnPatK4/etz2MEVDno5GMCibdMTuBMyElzIlgxMna3K94XDIDQ==}
     engines: {node: 20 || >=22}
@@ -1140,7 +1134,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@demox-labs/miden-sdk@0.8.2(chai@5.2.0)':
+  '@demox-labs/miden-sdk@0.8.3(chai@5.2.0)':
     dependencies:
       chai-as-promised: 8.0.1(chai@5.2.0)
       dexie: 4.0.11
@@ -1854,14 +1848,6 @@ snapshots:
     dependencies:
       braces: 3.0.3
       picomatch: 2.3.1
-
-  miden-test-sdk@0.8.7(chai@5.2.0):
-    dependencies:
-      chai-as-promised: 8.0.1(chai@5.2.0)
-      dexie: 4.0.11
-      glob: 11.0.2
-    transitivePeerDependencies:
-      - chai
 
   minimatch@10.0.1:
     dependencies:

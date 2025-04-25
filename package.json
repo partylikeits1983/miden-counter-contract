@@ -12,12 +12,11 @@
   },
   "dependencies": {
     "@demox-labs/miden-wallet-adapter-trident": "^0.1.2",
-    "@demox-labs/miden-sdk": "^0.8.2",
+    "@demox-labs/miden-sdk": "^0.8.3",
     "@demox-labs/miden-wallet-adapter-base": "^0.1.0",
     "@demox-labs/miden-wallet-adapter-react": "^0.1.0",
     "@demox-labs/miden-wallet-adapter-reactui": "^0.1.0",
     "git": "link:github.com:demox-labs/miden-wallet-adapter.git",
-    "miden-test-sdk": "^0.8.7",
     "miden-wallet-adapter-reactui": "link:@demox-labs/miden-wallet-adapter-reactui",
     "next": "15.3.1",
     "react": "^19.0.0",
