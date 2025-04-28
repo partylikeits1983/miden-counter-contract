@@ -67,7 +67,7 @@ export default function Home() {
 
           <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
             <h1 className="text-8xl font-bold">
-              Current Block Number: {isLoading ? "Loading..." : count}
+              Counter Count: {isLoading ? "loading..." : count}
             </h1>
             <button
               onClick={handleIncrement}
