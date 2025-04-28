@@ -31,7 +31,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchInitial() {
       try {
-        const { getCount } = await import("../lib/webclient");
+        const { getCount } = await import("../lib/webClient");
         const initial = await getCount();
         setCount(initial.valueOf());
       } catch (err) {
@@ -46,7 +46,7 @@ export default function Home() {
   const handleIncrement = async () => {
     setIsLoading(true);
     try {
-      const { incrementCount, getCount } = await import("../lib/webclient");
+      const { incrementCount, getCount } = await import("../lib/webClient");
       await incrementCount();
       const updated = await getCount();
       setCount(updated.valueOf());
