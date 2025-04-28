@@ -19,7 +19,6 @@ export async function getCount(): Promise<number> {
   const client = await WebClient.createClient(nodeEndpoint);
   await client.syncState();
 
-
   let account = await client.getAccount(counterContractId);
 
   if (!account) {
@@ -54,6 +53,7 @@ export async function incrementCount(): Promise<void> {
     const state = await client.syncState();
     console.log("Latest block number:", state.blockNum());
 
+    // @dev TODO: Need to enable compiling a transaction script with an assembler that has an added library.
     /*     
       let txScript = `
       use.external_contract::counter_contract
@@ -62,23 +62,26 @@ export async function incrementCount(): Promise<void> {
       end
     `; 
     */
+   // Otherwise you need to call the mast root of the procedure you want to call:
 
     let txScript = `
     begin
       call.0xecd7eb223a5524af0cc78580d96357b298bb0b3d33fe95aeb175d6dab9de2e54
     end
-    ` 
+    `;
 
     let transactionScript = await client.compileTxScript(txScript);
 
-    let transactionRequest = new TransactionRequestBuilder().withCustomScript(transactionScript).build();
+    let transactionRequest = new TransactionRequestBuilder()
+      .withCustomScript(transactionScript)
+      .build();
 
-
-    let transactionResult = await client.newTransaction(counterContractId, transactionRequest);
+    let transactionResult = await client.newTransaction(
+      counterContractId,
+      transactionRequest,
+    );
 
     await client.submitTransaction(transactionResult);
-
-
   } catch (error) {
     console.error("Error:", error);
     throw error;
