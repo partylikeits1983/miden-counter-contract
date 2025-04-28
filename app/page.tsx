@@ -10,7 +10,7 @@ import {
 } from "@demox-labs/miden-wallet-adapter-reactui";
 import { TridentWalletAdapter } from "@demox-labs/miden-wallet-adapter-trident";
 import "@demox-labs/miden-wallet-adapter-reactui/styles.css";
-import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
+// import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
 
 export default function Home() {
   // const { publicKey, wallet } = useWallet();

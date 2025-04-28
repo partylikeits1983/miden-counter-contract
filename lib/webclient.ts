@@ -2,17 +2,13 @@
 
 import {
   WebClient,
-  AccountStorageMode,
   AccountId,
-  NoteType,
-  Word,
   TransactionRequestBuilder,
 } from "@demox-labs/miden-sdk";
-import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
-import type { TridentWalletAdapter } from "@demox-labs/miden-wallet-adapter-trident";
+// import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
+// import type { TridentWalletAdapter } from "@demox-labs/miden-wallet-adapter-trident";
 
 const nodeEndpoint = "https://rpc.testnet.miden.io:443";
-
 const counterContractId = AccountId.fromHex("0x5fd8e3b9f4227200000581c6032f81");
 
 export async function getCount(): Promise<number> {
