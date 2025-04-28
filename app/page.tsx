@@ -10,12 +10,8 @@ import {
 } from "@demox-labs/miden-wallet-adapter-reactui";
 import { TridentWalletAdapter } from "@demox-labs/miden-wallet-adapter-trident";
 import "@demox-labs/miden-wallet-adapter-reactui/styles.css";
-// import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
 
 export default function Home() {
-  // const { publicKey, wallet } = useWallet();
-  // how to initialize public key and wallet?
-
   const wallets = useMemo(
     () => [
       new TridentWalletAdapter({
@@ -27,6 +23,7 @@ export default function Home() {
 
   const [count, setCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [transactionUrl, setTransactionUrl] = useState<string>("");
 
   useEffect(() => {
     async function fetchInitial() {
@@ -47,7 +44,10 @@ export default function Home() {
     setIsLoading(true);
     try {
       const { incrementCount, getCount } = await import("../lib/webClient");
-      await incrementCount();
+      const txUrlObject = await incrementCount();
+      const txUrl = txUrlObject.toString(); // ensure primitive string not String object
+      setTransactionUrl(txUrl);
+
       const updated = await getCount();
       setCount(updated.valueOf());
     } catch (err) {
@@ -60,38 +60,64 @@ export default function Home() {
   return (
     <WalletProvider wallets={wallets} autoConnect>
       <WalletModalProvider>
-        <div className="grid grid-rows-[auto_1fr_20px] items-center justify-items-center min-h-screen px-8 sm:px-20 pb-20 gap-16 font-[family-name:var(--font-geist-sans)]">
-          <header className="row-start-1 w-full flex justify-end mt-6 space-x-4">
-            <WalletMultiButton />
+        {/* ------------------- Layout Shell ------------------- */}
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 text-slate-800 dark:text-slate-100 flex flex-col">
+          {/* ------------------- Header ------------------- */}
+          <header className="w-full px-4 sm:px-8 py-4 flex justify-end">
+            <WalletMultiButton className="!text-sm xs:!text-base" />
           </header>
 
-          <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-            <h1 className="text-8xl font-bold">
-              Counter Count: {isLoading ? "loading..." : count}
-            </h1>
-            <button
-              onClick={handleIncrement}
-              disabled={isLoading}
-              className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-            >
-              Increment
-            </button>
+          {/* ------------------- Main ------------------- */}
+          <main className="flex-1 flex items-center justify-center px-4 sm:px-0">
+            {/* Card */}
+            <section className="w-full max-w-md bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-6">
+              {/* 1) Counter contract on Midenscan */}
+              <a
+                href="https://testnet.midenscan.com/account/0x5fd8e3b9f4227200000581c6032f81"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium hover:underline underline-offset-4"
+              >
+                Counter Contract on Midenscan
+              </a>
+
+              {/* 2) Count */}
+              <h1 className="text-6xl font-extrabold tracking-tight text-center tabular-nums min-h-[3.5rem]">
+                {isLoading ? "…" : count}
+              </h1>
+
+              {/* 3) Increment Button */}
+              <button
+                onClick={handleIncrement}
+                disabled={isLoading}
+                className="px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold shadow-lg shadow-indigo-400/50 hover:brightness-110 transition disabled:opacity-50 w-full sm:w-auto"
+              >
+                {isLoading ? "Processing…" : "Increment"}
+              </button>
+
+              {/* 4) Link to Tx */}
+              {transactionUrl && (
+                <a
+                  href={transactionUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline underline-offset-4 break-all text-center"
+                >
+                  View Transaction on Midenscan
+                </a>
+              )}
+            </section>
           </main>
 
-          <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+          {/* ------------------- Footer ------------------- */}
+          <footer className="w-full px-4 sm:px-8 py-6 flex flex-wrap items-center justify-center gap-6 text-sm opacity-80">
             <a
               className="flex items-center gap-2 hover:underline hover:underline-offset-4"
               href="https://0xpolygonmiden.github.io/miden-docs/"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Image
-                aria-hidden
-                src="/file.svg"
-                alt="File icon"
-                width={16}
-                height={16}
-              />
+              <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
               Miden Docs
             </a>
             <a
@@ -100,28 +126,16 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Image
-                aria-hidden
-                src="/window.svg"
-                alt="Window icon"
-                width={16}
-                height={16}
-              />
+              <Image aria-hidden src="/window.svg" alt="Window icon" width={16} height={16} />
               Tutorials
             </a>
             <a
-              className="flex items-center gap-[24px] hover:underline hover:underline-offset-4"
+              className="flex items-center gap-2 hover:underline hover:underline-offset-4"
               href="https://github.com/0xMiden"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Image
-                aria-hidden
-                src="/github.svg"
-                alt="GitHub icon"
-                width={16}
-                height={16}
-              />
+              <Image aria-hidden src="/github.svg" alt="GitHub icon" width={16} height={16} />
               GitHub
             </a>
           </footer>

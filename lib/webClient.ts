@@ -42,7 +42,7 @@ export async function getCount(): Promise<number> {
   return count;
 }
 
-export async function incrementCount(): Promise<void> {
+export async function incrementCount(): Promise<String> {
   try {
     const client = await WebClient.createClient(nodeEndpoint);
 
@@ -66,7 +66,7 @@ export async function incrementCount(): Promise<void> {
     end
     `;
 
-    let transactionScript = await client.compileTxScript(txScript);
+    let transactionScript = client.compileTxScript(txScript);
 
     let transactionRequest = new TransactionRequestBuilder()
       .withCustomScript(transactionScript)
@@ -78,6 +78,13 @@ export async function incrementCount(): Promise<void> {
     );
 
     await client.submitTransaction(transactionResult);
+
+    let txId  = transactionResult.executedTransaction().id().toHex();
+    let txUrl = `https://testnet.midenscan.com/tx/${txId}`;
+
+    console.log(txUrl);
+
+    return txUrl;
   } catch (error) {
     console.error("Error:", error);
     throw error;
