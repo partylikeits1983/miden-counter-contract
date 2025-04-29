@@ -113,7 +113,7 @@ export default function Home() {
           <footer className="w-full px-4 sm:px-8 py-6 flex flex-wrap items-center justify-center gap-6 text-sm opacity-80">
             <a
               className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-              href="https://0xpolygonmiden.github.io/miden-docs/"
+              href="https://0xMiden.github.io/miden-docs/"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -122,7 +122,7 @@ export default function Home() {
             </a>
             <a
               className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-              href="https://0xpolygonmiden.github.io/miden-docs/imported/miden-tutorials/src/index.html"
+              href="https://0xMiden.github.io/miden-docs/imported/miden-tutorials/src/index.html"
               target="_blank"
               rel="noopener noreferrer"
             >
