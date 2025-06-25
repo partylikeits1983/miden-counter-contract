@@ -11,6 +11,12 @@ import {
 import { TridentWalletAdapter } from "@demox-labs/miden-wallet-adapter-trident";
 import "@demox-labs/miden-wallet-adapter-reactui/styles.css";
 
+interface TokenInfo {
+  symbol: string;
+  decimals: number;
+  maxSupply: number;
+}
+
 export default function Home() {
   const wallets = useMemo(
     () => [
@@ -21,41 +27,23 @@ export default function Home() {
     [],
   );
 
-  const [count, setCount] = useState<number>(0);
+  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [transactionUrl, setTransactionUrl] = useState<string>("");
 
   useEffect(() => {
-    async function fetchInitial() {
+    async function fetchTokenInfo() {
       try {
-        const { getCount } = await import("../lib/webClient");
-        const initial = await getCount();
-        setCount(initial.valueOf());
+        const { getTokenInfo } = await import("../lib/webClient");
+        const info = await getTokenInfo();
+        setTokenInfo(info);
       } catch (err) {
         console.error(err);
       } finally {
         setIsLoading(false);
       }
     }
-    fetchInitial();
+    fetchTokenInfo();
   }, []);
-
-  const handleIncrement = async () => {
-    setIsLoading(true);
-    try {
-      const { incrementCount, getCount } = await import("../lib/webClient");
-      const txUrlObject = await incrementCount();
-      const txUrl = txUrlObject.toString(); // ensure primitive string not String object
-      setTransactionUrl(txUrl);
-
-      const updated = await getCount();
-      setCount(updated.valueOf());
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <WalletProvider wallets={wallets} autoConnect>
@@ -71,40 +59,62 @@ export default function Home() {
           <main className="flex-1 flex items-center justify-center px-4 sm:px-0">
             {/* Card */}
             <section className="w-full max-w-md bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-6">
-              {/* 1) Counter contract on Midenscan */}
+              {/* 1) Faucet Link */}
               <a
-                href="https://testnet.midenscan.com/account/mtst1qzej6cval60z7qqqqy8vk3qa8u4kzcq9"
+                href="https://faucet.testnet.miden.io"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium hover:underline underline-offset-4"
               >
-                Counter Contract on Midenscan
+                Miden Testnet Faucet
               </a>
 
-              {/* 2) Count */}
-              <h1 className="text-6xl font-extrabold tracking-tight text-center tabular-nums min-h-[3.5rem]">
-                {isLoading ? "…" : count}
-              </h1>
-
-              {/* 3) Increment Button */}
-              <button
-                onClick={handleIncrement}
-                disabled={isLoading}
-                className="px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold shadow-lg shadow-indigo-400/50 hover:brightness-110 transition disabled:opacity-50 w-full sm:w-auto"
-              >
-                {isLoading ? "Processing…" : "Increment"}
-              </button>
-
-              {/* 4) Link to Tx */}
-              {transactionUrl && (
-                <a
-                  href={transactionUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline underline-offset-4 break-all text-center"
-                >
-                  View Transaction on Midenscan
-                </a>
+              {/* 2) Token Information */}
+              {isLoading ? (
+                <div className="text-center">
+                  <h1 className="text-4xl font-extrabold tracking-tight mb-4">Loading Token Info...</h1>
+                </div>
+              ) : tokenInfo ? (
+                <div className="text-center space-y-4 w-full">
+                  <h1 className="text-5xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400">
+                    {tokenInfo.symbol}
+                  </h1>
+                  
+                  <div className="grid grid-cols-1 gap-4 w-full">
+                    <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-4">
+                      <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">
+                        Symbol
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {tokenInfo.symbol}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-4">
+                      <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">
+                        Decimals
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {tokenInfo.decimals}
+                      </div>
+                    </div>
+                    
+                    <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-4">
+                      <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-1">
+                        Max Supply
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {tokenInfo.maxSupply.toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <h1 className="text-4xl font-extrabold tracking-tight text-red-500">
+                    Failed to load token info
+                  </h1>
+                </div>
               )}
             </section>
           </main>
