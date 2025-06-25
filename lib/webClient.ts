@@ -1,5 +1,9 @@
 "use client";
 
+// Counter contract account id on testnet - defined once
+const COUNTER_CONTRACT_ID_HEX = "0xb32d619dfe9e2f0000010ecb441d3f";
+const NODE_ENDPOINT = "https://rpc.testnet.miden.io:443";
+
 export async function getCount(): Promise<number> {
   if (typeof window === "undefined") {
     console.warn("getCount() can only run in the browser");
@@ -9,20 +13,20 @@ export async function getCount(): Promise<number> {
   // dynamic import → only in the browser, so WASM is loaded client‑side
   const { WebClient, AccountId } = await import("@demox-labs/miden-sdk");
 
-  const nodeEndpoint = "https://rpc.testnet.miden.io:443";
+  const counterContractId = AccountId.fromHex(COUNTER_CONTRACT_ID_HEX);
 
-  // Counter contract account id on testnet
-  const counterContractId = AccountId.fromHex(
-    "0xb32d619dfe9e2f0000010ecb441d3f",
-  );
+  const client = await WebClient.createClient(NODE_ENDPOINT);
 
-  const client = await WebClient.createClient(nodeEndpoint);
-
-  // Note: Actual methods may differ, this is a placeholder
-  const counterContractAccount = await client.getAccount(counterContractId);
-
+  // Get the account, import if not found
+  let counterContractAccount = await client.getAccount(counterContractId);
+  
   if (!counterContractAccount) {
-    throw new Error(`Account not found: ${counterContractId}`);
+    await client.importAccountById(counterContractId);
+    await client.syncState();
+    counterContractAccount = await client.getAccount(counterContractId);
+    if (!counterContractAccount) {
+      throw new Error(`Account not found after import: ${counterContractId}`);
+    }
   }
 
   // read slot 0
@@ -48,40 +52,137 @@ export async function incrementCount(): Promise<string> {
   }
 
   // dynamic import → only in the browser, so WASM is loaded client‑side
-  const { WebClient, AccountId, TransactionRequestBuilder } = await import(
-    "@demox-labs/miden-sdk"
-  );
+  const {
+    AccountId,
+    AssemblerUtils,
+    TransactionKernel,
+    TransactionRequestBuilder,
+    TransactionScript,
+    TransactionScriptInputPairArray,
+    WebClient,
+  } = await import("@demox-labs/miden-sdk");
 
-  const nodeEndpoint = "https://rpc.testnet.miden.io:443";
-
-  // Counter contract account id on testnet
-  const counterContractId = AccountId.fromHex(
-    "0xb32d619dfe9e2f0000010ecb441d3f",
-  );
+  const counterContractId = AccountId.fromHex(COUNTER_CONTRACT_ID_HEX);
 
   try {
-    const client = await WebClient.createClient(nodeEndpoint);
+    const client = await WebClient.createClient(NODE_ENDPOINT);
+    console.log("Current block number: ", (await client.syncState()).blockNum());
 
-    // Transaction script to call the increment method
-    const txScript = `
-    begin
-      call.0xecd7eb223a5524af0cc78580d96357b298bb0b3d33fe95aeb175d6dab9de2e54
-    end
+    // Counter contract code in Miden Assembly
+    const counterContractCode = `
+      use.miden::account
+      use.std::sys
+
+      # => []
+      export.get_count
+          push.0
+          # => [index]
+          
+          # exec.account::get_item
+          # => [count]
+          
+          # exec.sys::truncate_stack
+          # => []
+      end
+
+      # => []
+      export.increment_count
+          push.0
+          # => [index]
+          
+          exec.account::get_item
+          # => [count]
+          
+          push.1 add
+          # => [count+1]
+
+          # debug statement with client
+          debug.stack
+
+          push.0
+          # [index, count+1]
+          
+          exec.account::set_item
+          # => []
+          
+          push.1 exec.account::incr_nonce
+          # => []
+          
+          exec.sys::truncate_stack
+          # => []
+      end
     `;
 
-    // Prepare transaction request
-    const transactionRequest = new TransactionRequestBuilder()
-      .withCustomScript(client.compileTxScript(txScript))
+    // Building the counter contract
+    let assembler = TransactionKernel.assembler();
+
+    // Reading the public state of the counter contract from testnet,
+    // and importing it into the WebClient
+    let counterContractAccount = await client.getAccount(counterContractId);
+    if (!counterContractAccount) {
+      await client.importAccountById(counterContractId);
+      await client.syncState();
+      counterContractAccount = await client.getAccount(counterContractId);
+      if (!counterContractAccount) {
+        throw new Error(`Account not found after import: ${counterContractId}`);
+      }
+    }
+
+    // Building the transaction script which will call the counter contract
+    let txScriptCode = `
+      use.external_contract::counter_contract
+      begin
+          call.counter_contract::increment_count
+      end
+    `;
+
+    // Empty inputs to the transaction script
+    const inputs = new TransactionScriptInputPairArray();
+
+    // Creating the library to call the counter contract
+    let counterComponentLib = AssemblerUtils.createAccountComponentLibrary(
+      assembler, // assembler
+      "external_contract::counter_contract", // library path to call the contract
+      counterContractCode, // account code of the contract
+    );
+
+    // Creating the transaction script
+    let txScript = TransactionScript.compile(
+      txScriptCode,
+      inputs,
+      assembler.withLibrary(counterComponentLib),
+    );
+
+    // Creating a transaction request with the transaction script
+    let transactionRequest = new TransactionRequestBuilder()
+      .withCustomScript(txScript)
       .build();
 
-    // Execute transaction
-    const transactionResult = await client.newTransaction(
-      counterContractId,
+    // Executing the transaction script against the counter contract
+    let transactionResult = await client.newTransaction(
+      counterContractAccount.id(),
       transactionRequest,
     );
 
     // Submit transaction
     await client.submitTransaction(transactionResult);
+
+    // Sync state
+    await client.syncState();
+
+    // Logging the count of counter contract
+    let counter = await client.getAccount(counterContractAccount.id());
+
+    // Here we get the first Word from storage of the counter contract
+    // A word is comprised of 4 Felts, 2**64 - 2**32 + 1
+    let count = counter?.storage().getItem(0);
+
+    // Converting the Word represented as a hex to a single integer value
+    const counterValue = Number(
+      BigInt("0x" + count!.toHex().slice(-16).match(/../g)!.reverse().join("")),
+    );
+
+    console.log("Count: ", counterValue);
 
     const txId = transactionResult.executedTransaction().id().toHex();
     const txUrl = `https://testnet.midenscan.com/tx/${txId}`;
