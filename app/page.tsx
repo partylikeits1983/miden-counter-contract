@@ -73,7 +73,7 @@ export default function Home() {
             <section className="w-full max-w-md bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-6">
               {/* 1) Counter contract on Midenscan */}
               <a
-                href="https://testnet.midenscan.com/account/0x5fd8e3b9f4227200000581c6032f81"
+                href="https://testnet.midenscan.com/account/mtst1qzej6cval60z7qqqqy8vk3qa8u4kzcq9"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium hover:underline underline-offset-4"
@@ -117,7 +117,13 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
+              <Image
+                aria-hidden
+                src="/file.svg"
+                alt="File icon"
+                width={16}
+                height={16}
+              />
               Miden Docs
             </a>
             <a
@@ -126,7 +132,13 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Image aria-hidden src="/window.svg" alt="Window icon" width={16} height={16} />
+              <Image
+                aria-hidden
+                src="/window.svg"
+                alt="Window icon"
+                width={16}
+                height={16}
+              />
               Tutorials
             </a>
             <a
@@ -135,7 +147,13 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Image aria-hidden src="/github.svg" alt="GitHub icon" width={16} height={16} />
+              <Image
+                aria-hidden
+                src="/github.svg"
+                alt="GitHub icon"
+                width={16}
+                height={16}
+              />
               GitHub
             </a>
           </footer>

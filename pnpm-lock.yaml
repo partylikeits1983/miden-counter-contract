@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@demox-labs/miden-sdk':
-    specifier: ^0.8.3
-    version: 0.8.3(chai@5.2.0)
+    specifier: ^0.9.2
+    version: 0.9.2(chai@5.2.0)
   '@demox-labs/miden-wallet-adapter-base':
     specifier: ^0.1.0
     version: 0.1.4
@@ -69,8 +69,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /@demox-labs/miden-sdk@0.8.3(chai@5.2.0):
-    resolution: {integrity: sha512-OcvX5WR6J9NSnSa1Q6YFAgutMfF3W50GNTcFr4T4FNp0tBnZA6Uhew6UImHauRKlR79tD6t+Ock9Nlaeoiev/A==}
+  /@demox-labs/miden-sdk@0.9.2(chai@5.2.0):
+    resolution: {integrity: sha512-Ct1OvLT5TRMCX6FxnlvbD8FsfRb7YDgGD40aWaZ8te8K3la9YOKIk5KQlszCJDaUJPAYFG6TSLBtGBoGP9vzRA==}
     dependencies:
       chai-as-promised: 8.0.1(chai@5.2.0)
       dexie: 4.0.11

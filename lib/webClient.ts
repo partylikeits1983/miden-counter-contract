@@ -1,33 +1,32 @@
 "use client";
 
-import {
-  WebClient,
-  AccountId,
-  TransactionRequestBuilder,
-} from "@demox-labs/miden-sdk";
-// import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
-// import type { TridentWalletAdapter } from "@demox-labs/miden-wallet-adapter-trident";
-
-const nodeEndpoint = "https://rpc.testnet.miden.io:443";
-const counterContractId = AccountId.fromHex("0x5fd8e3b9f4227200000581c6032f81");
-
 export async function getCount(): Promise<number> {
+  if (typeof window === "undefined") {
+    console.warn("getCount() can only run in the browser");
+    return 0;
+  }
+
+  // dynamic import → only in the browser, so WASM is loaded client‑side
+  const { WebClient, AccountId } = await import("@demox-labs/miden-sdk");
+
+  const nodeEndpoint = "https://rpc.testnet.miden.io:443";
+
+  // Counter contract account id on testnet
+  const counterContractId = AccountId.fromHex(
+    "0xb32d619dfe9e2f0000010ecb441d3f",
+  );
+
   const client = await WebClient.createClient(nodeEndpoint);
-  await client.syncState();
 
-  let account = await client.getAccount(counterContractId);
+  // Note: Actual methods may differ, this is a placeholder
+  const counterContractAccount = await client.getAccount(counterContractId);
 
-  if (!account) {
-    await client.importAccountById(counterContractId);
-    await client.syncState();
-    account = await client.getAccount(counterContractId);
-    if (!account) {
-      throw new Error(`Account not found after import: ${counterContractId}`);
-    }
+  if (!counterContractAccount) {
+    throw new Error(`Account not found: ${counterContractId}`);
   }
 
   // read slot 0
-  const storageItem = account.storage().getItem(0);
+  const storageItem = counterContractAccount.storage().getItem(0);
   if (!storageItem) {
     throw new Error("No storage item at key 0");
   }
@@ -42,45 +41,50 @@ export async function getCount(): Promise<number> {
   return count;
 }
 
-export async function incrementCount(): Promise<String> {
+export async function incrementCount(): Promise<string> {
+  if (typeof window === "undefined") {
+    console.warn("incrementCount() can only run in the browser");
+    return "";
+  }
+
+  // dynamic import → only in the browser, so WASM is loaded client‑side
+  const { WebClient, AccountId, TransactionRequestBuilder } = await import(
+    "@demox-labs/miden-sdk"
+  );
+
+  const nodeEndpoint = "https://rpc.testnet.miden.io:443";
+
+  // Counter contract account id on testnet
+  const counterContractId = AccountId.fromHex(
+    "0xb32d619dfe9e2f0000010ecb441d3f",
+  );
+
   try {
     const client = await WebClient.createClient(nodeEndpoint);
 
-    const state = await client.syncState();
-    console.log("Latest block number:", state.blockNum());
-
-    // @dev TODO: Need to enable compiling a transaction script with an assembler that has an added library.
-    /*     
-      let txScript = `
-      use.external_contract::counter_contract
-      begin
-          call.counter_contract::increment_count
-      end
-    `; 
-    */
-   // Otherwise you need to call the mast root of the procedure you want to call:
-
-    let txScript = `
+    // Transaction script to call the increment method
+    const txScript = `
     begin
       call.0xecd7eb223a5524af0cc78580d96357b298bb0b3d33fe95aeb175d6dab9de2e54
     end
     `;
 
-    let transactionScript = client.compileTxScript(txScript);
-
-    let transactionRequest = new TransactionRequestBuilder()
-      .withCustomScript(transactionScript)
+    // Prepare transaction request
+    const transactionRequest = new TransactionRequestBuilder()
+      .withCustomScript(client.compileTxScript(txScript))
       .build();
 
-    let transactionResult = await client.newTransaction(
+    // Execute transaction
+    const transactionResult = await client.newTransaction(
       counterContractId,
       transactionRequest,
     );
 
+    // Submit transaction
     await client.submitTransaction(transactionResult);
 
-    let txId  = transactionResult.executedTransaction().id().toHex();
-    let txUrl = `https://testnet.midenscan.com/tx/${txId}`;
+    const txId = transactionResult.executedTransaction().id().toHex();
+    const txUrl = `https://testnet.midenscan.com/tx/${txId}`;
 
     console.log(txUrl);
 
