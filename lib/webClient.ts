@@ -1,7 +1,7 @@
 "use client";
 
 // Counter contract account id on testnet - defined once
-const COUNTER_CONTRACT_ID_HEX = "0xb32d619dfe9e2f0000010ecb441d3f";
+const COUNTER_CONTRACT_ID_BECH32 = "mtst1qr845cd3fadh5qrc96rvwqepsg8fjyts";
 const NODE_ENDPOINT = "https://rpc.testnet.miden.io:443";
 
 export async function getCount(): Promise<number> {
@@ -13,13 +13,13 @@ export async function getCount(): Promise<number> {
   // dynamic import → only in the browser, so WASM is loaded client‑side
   const { WebClient, AccountId } = await import("@demox-labs/miden-sdk");
 
-  const counterContractId = AccountId.fromHex(COUNTER_CONTRACT_ID_HEX);
+  const counterContractId = AccountId.fromBech32(COUNTER_CONTRACT_ID_BECH32);
 
   const client = await WebClient.createClient(NODE_ENDPOINT);
 
   // Get the account, import if not found
   let counterContractAccount = await client.getAccount(counterContractId);
-  
+
   if (!counterContractAccount) {
     await client.importAccountById(counterContractId);
     await client.syncState();
@@ -58,15 +58,17 @@ export async function incrementCount(): Promise<string> {
     TransactionKernel,
     TransactionRequestBuilder,
     TransactionScript,
-    TransactionScriptInputPairArray,
     WebClient,
   } = await import("@demox-labs/miden-sdk");
 
-  const counterContractId = AccountId.fromHex(COUNTER_CONTRACT_ID_HEX);
+  const counterContractId = AccountId.fromBech32(COUNTER_CONTRACT_ID_BECH32);
 
   try {
     const client = await WebClient.createClient(NODE_ENDPOINT);
-    console.log("Current block number: ", (await client.syncState()).blockNum());
+    console.log(
+      "Current block number: ",
+      (await client.syncState()).blockNum()
+    );
 
     // Counter contract code in Miden Assembly
     const counterContractCode = `
@@ -77,37 +79,34 @@ export async function incrementCount(): Promise<string> {
       export.get_count
           push.0
           # => [index]
-          
-          # exec.account::get_item
+
+          exec.account::get_item
           # => [count]
-          
-          # exec.sys::truncate_stack
-          # => []
+
+          exec.sys::truncate_stack
+          # => [count]
       end
 
       # => []
-      export.increment_count
+      export.increment
           push.0
           # => [index]
-          
+
           exec.account::get_item
           # => [count]
-          
+
           push.1 add
           # => [count+1]
 
           # debug statement with client
-          debug.stack
+          push.111 debug.stack drop
 
           push.0
           # [index, count+1]
-          
+
           exec.account::set_item
           # => []
-          
-          push.1 exec.account::incr_nonce
-          # => []
-          
+
           exec.sys::truncate_stack
           # => []
       end
@@ -132,25 +131,21 @@ export async function incrementCount(): Promise<string> {
     let txScriptCode = `
       use.external_contract::counter_contract
       begin
-          call.counter_contract::increment_count
+          call.counter_contract::increment
       end
     `;
-
-    // Empty inputs to the transaction script
-    const inputs = new TransactionScriptInputPairArray();
 
     // Creating the library to call the counter contract
     let counterComponentLib = AssemblerUtils.createAccountComponentLibrary(
       assembler, // assembler
       "external_contract::counter_contract", // library path to call the contract
-      counterContractCode, // account code of the contract
+      counterContractCode // account code of the contract
     );
 
     // Creating the transaction script
     let txScript = TransactionScript.compile(
       txScriptCode,
-      inputs,
-      assembler.withLibrary(counterComponentLib),
+      assembler.withLibrary(counterComponentLib)
     );
 
     // Creating a transaction request with the transaction script
@@ -161,7 +156,7 @@ export async function incrementCount(): Promise<string> {
     // Executing the transaction script against the counter contract
     let transactionResult = await client.newTransaction(
       counterContractAccount.id(),
-      transactionRequest,
+      transactionRequest
     );
 
     // Submit transaction
@@ -179,7 +174,7 @@ export async function incrementCount(): Promise<string> {
 
     // Converting the Word represented as a hex to a single integer value
     const counterValue = Number(
-      BigInt("0x" + count!.toHex().slice(-16).match(/../g)!.reverse().join("")),
+      BigInt("0x" + count!.toHex().slice(-16).match(/../g)!.reverse().join(""))
     );
 
     console.log("Count: ", counterValue);
