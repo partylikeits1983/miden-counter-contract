@@ -1,7 +1,7 @@
 "use client";
 
 // Counter contract account id on testnet - defined once
-const COUNTER_CONTRACT_ID_BECH32 = "mtst1qr845cd3fadh5qrc96rvwqepsg8fjyts";
+const COUNTER_CONTRACT_ID_BECH32 = "mtst1qpcls0rfcszxvqrhnvn3xvqvapcqqg88tg9";
 const NODE_ENDPOINT = "https://rpc.testnet.miden.io:443";
 
 export async function getCount(): Promise<number> {
@@ -11,9 +11,11 @@ export async function getCount(): Promise<number> {
   }
 
   // dynamic import → only in the browser, so WASM is loaded client‑side
-  const { WebClient, AccountId } = await import("@demox-labs/miden-sdk");
+  const { WebClient, Address } = await import("@demox-labs/miden-sdk");
 
-  const counterContractId = AccountId.fromBech32(COUNTER_CONTRACT_ID_BECH32);
+  const counterContractId = Address.fromBech32(
+    COUNTER_CONTRACT_ID_BECH32
+  ).accountId();
 
   const client = await WebClient.createClient(NODE_ENDPOINT);
 
@@ -53,7 +55,7 @@ export async function incrementCount(): Promise<string> {
 
   // dynamic import → only in the browser, so WASM is loaded client‑side
   const {
-    AccountId,
+    Address,
     AssemblerUtils,
     TransactionKernel,
     TransactionRequestBuilder,
@@ -61,7 +63,9 @@ export async function incrementCount(): Promise<string> {
     WebClient,
   } = await import("@demox-labs/miden-sdk");
 
-  const counterContractId = AccountId.fromBech32(COUNTER_CONTRACT_ID_BECH32);
+  const counterContractId = Address.fromBech32(
+    COUNTER_CONTRACT_ID_BECH32
+  ).accountId();
 
   try {
     const client = await WebClient.createClient(NODE_ENDPOINT);

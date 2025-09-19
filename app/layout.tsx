@@ -10,6 +10,7 @@ import { WalletModalProvider } from "@demox-labs/miden-wallet-adapter-reactui";
 import { TridentWalletAdapter } from "@demox-labs/miden-wallet-adapter-trident";
 import { useWallet } from "@demox-labs/miden-wallet-adapter-react";
 import "@demox-labs/miden-wallet-adapter-reactui/styles.css";
+import { MidenWalletAdapter } from "@demox-labs/miden-wallet-adapter-miden";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,13 +24,13 @@ const geistMono = Geist_Mono({
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const wallets = useMemo(
+  const wallets: MidenWalletAdapter[] = useMemo(
     () => [
-      new TridentWalletAdapter({
+      new MidenWalletAdapter({
         appName: "My Miden App",
       }),
     ],
-    [],
+    []
   );
 
   return (
